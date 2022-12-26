@@ -19,8 +19,8 @@ const userSchema = new mongoose.Schema({
     },
     is_payable:Boolean,
     can_create_trade:Boolean,
+    current_rank:String,
     
-
 })
 
 module.exports=mongoose.model("user" , userSchema);
