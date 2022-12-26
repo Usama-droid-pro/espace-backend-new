@@ -2,13 +2,17 @@
 const mongoose = require("mongoose")
 const user_salesSchema = new mongoose.Schema({
     _id:mongoose.Schema.Types.ObjectId,
-    invited_user_id:mongoose.Schema.Types.ObjectId,
-    sale_user_id:mongoose.Schema.Types.ObjectId,
+    referral_id:String,
+    total_sales:Number,
     year:String,
     month:String,
-    year:String,
+    rank_id:String,
     transaction_id:String,
-    referral_code:String,
+    commissions:String,
+    bonus:String,
+    payout_status:String,
+    payout_amount:String,
+    date_of_payout:String,
     date_created:{
         type:Date,
         default:new Date(Date.now())

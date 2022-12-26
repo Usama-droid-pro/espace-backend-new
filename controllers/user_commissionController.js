@@ -8,14 +8,15 @@ const productPriceModel = require("../models/productPriceModel");
 
 exports.getUserCommission= async (req, res, next) => {
 
-    let user_rank = "BP2D"
-    let user_sales = 16
+    let user_rank = "BP3RR"
+    let user_sales = 20
 
     var totalBonusOfUser ;
     var totalCommissionOfUser;
 
     //getting commission price for rank 
     if(user_rank){
+        if(user_rank == "BP1RG" || user_rank == "BP2RD" || user_rank == "BP3RR"){
         const getCommissionPriceForUser_rank= await getCommissionPriceForRank(user_rank);
         console.log("this is"+getCommissionPriceForUser_rank)
 
@@ -53,9 +54,10 @@ exports.getUserCommission= async (req, res, next) => {
     else{
         return (
             res.json({
-                message: "Could not find user rank , Make Sure rank of User is present in user table",
+                message: "user_rank Must be One of these . BP1RG , BP2RD , BP3RR . While Looking user rank it user rank does not follow the",
                 status:false
             })
+           
         )
     }
     //------------------------------------------------------------------------------------------------------------------------------------------
@@ -65,19 +67,53 @@ exports.getUserCommission= async (req, res, next) => {
     if(user_sales){
         if(user_sales >=1 && user_sales <20){
             const getBonusPriceForUserSalesForTen = await bonus_plan.findOne({rank_uniq_id:user_rank , sales_no:10});
-            totalBonusOfUser= parseInt(getBonusPriceForUserSalesForTen.bonus_price);
+            if(getBonusPriceForUserSalesForTen){
+                totalBonusOfUser= parseInt(getBonusPriceForUserSalesForTen.bonus_price);
+            }else{
+                return(
+                        res.json({
+                            message: "It seems that bonus price is not properly set for every rank and sales_no , Bonus price missing",
+                            status:false
+                        })
+                )
+            }
+            
         }
         else if(user_sales>=20 && user_sales <30){
+            
             const getBonusPriceForUserSalesForTen = await bonus_plan.findOne({rank_uniq_id:user_rank , sales_no:10});
             const getBonusPriceForUserSalesForTwenty = await bonus_plan.findOne({rank_uniq_id:user_rank , sales_no:20});
-            totalBonusOfUser= parseInt(getBonusPriceForUserSalesForTen.bonus_price) + parseInt(getBonusPriceForUserSalesForTwenty.bonus_price);
+
+            if(getBonusPriceForUserSalesForTen && getBonusPriceForUserSalesForTwenty){
+                totalBonusOfUser= parseInt(getBonusPriceForUserSalesForTen.bonus_price) + parseInt(getBonusPriceForUserSalesForTwenty.bonus_price);
+            }
+            else{
+                return(
+                    res.json({
+                        message: "It seems that bonus price is not properly set for every rank and sales_no , Bonus price missing",
+                        status:false
+                    })
+                )
+            }
+            
         }
         else if(user_sales >=30){
             const getBonusPriceForUserSalesForTen = await bonus_plan.findOne({rank_uniq_id:user_rank , sales_no:10});
             const getBonusPriceForUserSalesForTwenty = await bonus_plan.findOne({rank_uniq_id:user_rank , sales_no:20});
             const getBonusPriceForUserSalesForThirty = await bonus_plan.findOne({rank_uniq_id:user_rank , sales_no:30});
 
-            totalBonusOfUser= parseInt(getBonusPriceForUserSalesForTen.bonus_price) + parseInt(getBonusPriceForUserSalesForTwenty.bonus_price) + parseInt(getBonusPriceForUserSalesForThirty.bonus_price);
+            if(getBonusPriceForUserSalesForTen && getBonusPriceForUserSalesForTwenty && getBonusPriceForUserSalesForThirty){
+                totalBonusOfUser= parseInt(getBonusPriceForUserSalesForTen.bonus_price) + parseInt(getBonusPriceForUserSalesForTwenty.bonus_price) + parseInt(getBonusPriceForUserSalesForThirty.bonus_price);
+            }
+            else{
+                return(
+                    res.json({
+                        message: "It seems that bonus price is not properly set for every rank and sales_no , Bonus price missing",
+                        status:false
+                    })
+                )
+            }
+
         }
 
     }
@@ -99,7 +135,13 @@ exports.getUserCommission= async (req, res, next) => {
             status:false
         })
     }
-
+}
+else{
+    res.json({
+        message: "Could not find user rank , Make Sure rank of User is present in user table",
+        status:false
+    })
+}
 }
 
 async function getCommissionPriceForRank (rank){
@@ -111,6 +153,7 @@ async function getCommissionPriceForRank (rank){
             console.log(product_price)
             console.log(typeof(product_price))
 
+            console.log(product_price)
             if(product_price){
             var result= await rankModel.aggregate([
                 {
@@ -127,7 +170,7 @@ async function getCommissionPriceForRank (rank){
                 
             ])
             console.log(result)
-            if(result){
+            if(result.length>0){
                 if(result[0].price){
                     commissionPrice=result[0].price;
                     return commissionPrice;
