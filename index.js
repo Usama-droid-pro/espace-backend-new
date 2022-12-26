@@ -54,6 +54,8 @@ app.use("/rank" , require("./routes/rankRoute"))
 app.use("/bonus_plan" , require("./routes/bonusPlanRoute"))
 app.use("/notification" , require("./routes/notificationRoute"))
 app.use("/user_commission" , require("./routes/userCommissionRoute"))
+app.use("/sales" , require("./routes/createSalesRoute"))
+
 
 
 

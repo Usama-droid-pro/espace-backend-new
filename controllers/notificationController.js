@@ -279,6 +279,9 @@ exports.NotificationsBySystem = async (req,res)=>{
         })
     }
 }
+
+
+
 exports.getNotificationsOfSpecificUser = async (req,res)=>{
     try{
         let user_id = req.query.user_id;
