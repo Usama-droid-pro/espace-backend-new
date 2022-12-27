@@ -80,7 +80,6 @@ exports.getUserCommission= async (req, res, next) => {
             
         }
         else if(user_sales>=20 && user_sales <30){
-            
             const getBonusPriceForUserSalesForTen = await bonus_plan.findOne({rank_uniq_id:user_rank , sales_no:10});
             const getBonusPriceForUserSalesForTwenty = await bonus_plan.findOne({rank_uniq_id:user_rank , sales_no:20});
 

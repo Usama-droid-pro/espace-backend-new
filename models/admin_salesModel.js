@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const admin_salesSchema = new mongoose.Schema({
     _id:mongoose.Schema.Types.ObjectId,
     referral_id:String,
-    invited_user_id:mongoose.Schema.Types.ObjectId,
+    invited_user_id:String,
     day:String,
     year:String,
     month:String,
