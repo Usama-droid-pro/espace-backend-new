@@ -25,7 +25,7 @@ const tradeModel = new mongoose.Schema({
     buy_price :{
         type: String,
     },
-    currentPrice:{
+    current_price:{
         type: String,
 
     },
