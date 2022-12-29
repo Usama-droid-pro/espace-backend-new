@@ -6,6 +6,7 @@ const productPriceModel = require("../models/productPriceModel")
 const rankModel = require("../models/ranksModel")
 const bonus_plan=require("../models/bonusPlanModel");
 
+
 exports.createSale= async (req,res)=>{
     try{
         const referral_id= req.body.referral_id;
@@ -46,7 +47,41 @@ exports.createSale= async (req,res)=>{
 
         if(referral_exists==true){
             //if referral exists is true than we are creating admin sales .
-            const isAdminSalesSaved =await createAdminSales(day, transaction_id, invited_user_id,month , referral_exists , year , referral_id)
+            var current_rank_of_user = await getCurrentRankOfUser(referral_id);
+            var productPrice = await getProductPrice();
+        
+            if(!productPrice){
+                return(
+                    res.json({
+                        message: "It Seems product price is not added in product price table",
+                        status:false
+                    })
+                )
+            }
+            if(!current_rank_of_user){
+                return(
+                    res.json({
+                        message: "Current rank of user not found",
+                        status:false
+                    })
+                )}
+
+            var getCommission_adminProfit = await getCommissionPerSale(productPrice, current_rank_of_user);
+
+            if(getCommission_adminProfit=="error"){
+                return(
+                    res.json({
+                        message: "Could not able to calculate commission per sale & admin profit ",
+                        status:false
+                    })
+                )
+            }
+
+            var adminProfit = getCommission_adminProfit.adminProfit;
+            var user_commission = getCommission_adminProfit.commissionPrice;
+
+
+            const isAdminSalesSaved =await createAdminSales(day, transaction_id, invited_user_id,month , referral_exists , year , referral_id, current_rank_of_user , productPrice , adminProfit , user_commission)
             if(isAdminSalesSaved){
                 console.log("Admin sales saved successfully")
                 responses.adminSaleMessage="Admin Sales were saved successfully"
@@ -152,7 +187,16 @@ exports.createSale= async (req,res)=>{
             
         }
         else if (referral_exists==false){
-            const isAdminSalesSaved =await createAdminSales(day, transaction_id, 0 ,month , referral_exists , year , 0)
+            var productPrice = await getProductPrice(); // getting product price
+            if(!productPrice){
+                return(
+                    res.json({
+                        message: "It Seems product price is not added in product price table",
+                        status:false
+                    })
+                )
+            }
+            const isAdminSalesSaved =await createAdminSales(day, transaction_id, 0 ,month , referral_exists , year , 0 , 0 , productPrice , productPrice ,0) // if no referaral than obviously adminprofilt will be eq to product price
             if(isAdminSalesSaved==true){
                 res.json({
                     message: "Admin Sales Created",
@@ -177,6 +221,7 @@ exports.createSale= async (req,res)=>{
 exports.getUserTotalSales = async (req,res)=>{
     try{
         const referral_id = req.query.referral_id;
+
         
         if(!referral_id){
             return (
@@ -186,7 +231,29 @@ exports.getUserTotalSales = async (req,res)=>{
                 })
             )
         }
-        const result = await user_salesModel.find({referral_id: referral_id});
+        const result = await user_salesModel.aggregate([
+            {
+                $match:{
+                    referral_id:referral_id,
+                }
+            },
+
+            {"$group":{
+                "_id":{"month":{"$month":"$date_created"},"year":{"$year":"$date_created"}},
+                "sales":{"$push":"$$ROOT"}
+              }},
+            {"$sort":{"month":-1,"year":-1}},
+
+        ]);
+        
+        for(let i=0 ; i<result.length ; i++){
+            if(result[i]._id.year){
+                result[i]._id.year = result[i]._id.year.toLocaleString();
+                console.log(result[i]._id.year)
+
+            }
+        }
+
         if(result){
             res.json({
                 message: "All months total sales of User are:",
@@ -388,21 +455,55 @@ exports.createPayout = async (req,res)=>{
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-async function createAdminSales(day, transaction_id, invited_user_id,month , referral_exists , year , referral_id){
+exports.getAllSales = async (req,res)=>{
     try{
+        const result = await admin_salesModel.aggregate([
+            {"$group":{
+                "_id":{"month":{"$month":"$date_created"},"year":{"$year":"$date_created"}},
+                "sales":{"$push":"$$ROOT"}
+              }},
+            {"$sort":{"month":-1,"year":-1}},
+
+        ]);
+        
+        for(let i=0 ; i<result.length ; i++){
+            if(result[i]._id.year){
+                result[i]._id.year = result[i]._id.year.toLocaleString();
+                console.log(result[i]._id.year)
+
+            }
+        }
+
+       
+        if(result){
+            console.log(result)
+            res.json(result)
+        }else{
+        res.json({
+            message: "Could not fetch",
+            status:false
+        })
+        }
+    }
+    catch(e){
+        res.json(e)
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+async function createAdminSales(day, transaction_id, invited_user_id,month , referral_exists , year , referral_id , user_current_rank , productPrice , adminProfit , user_commission){
+    try{
+        console.log(productPrice ,adminProfit ,)
         var newAdminSales = new admin_salesModel({
             _id:mongoose.Types.ObjectId(),
             day:day,
@@ -411,7 +512,12 @@ async function createAdminSales(day, transaction_id, invited_user_id,month , ref
             referral_exist:referral_exists,
             transaction_id:transaction_id,
             invited_user_id:invited_user_id,
-            referral_id:referral_id
+            referral_id:referral_id,
+            user_current_rank:user_current_rank,
+            product_price:productPrice,
+            admin_profit :adminProfit,
+            user_commission:user_commission
+
         })
 
         const result = await newAdminSales.save();
@@ -867,5 +973,41 @@ async function updatePayout_amount(commissionPrice , total_sales , referral_id ,
     catch(err){
         console.log(err)
         return null
+    }
+}
+
+async function getCommissionPerSale(productPrice , rank_id){
+    try{
+        const result = await rankModel.findOne({unique_id:rank_id});
+        if(result){
+            console.log(result);
+            if(result.commission){
+                console.log(typeof(result.commission))
+                var commission= parseInt (result.commission);
+
+            }
+
+            let commissionPrice= (commission/100)* parseInt(productPrice);
+            if(commissionPrice){
+                var adminProfit = parseInt(productPrice) - commissionPrice;
+            }
+
+            console.log(adminProfit + " " + commissionPrice)
+            if(commissionPrice && adminProfit){
+                return {
+                    adminProfit: adminProfit,
+                    commissionPrice: commissionPrice
+                }
+            }
+            else{
+                return "error"
+            }
+
+            
+        }
+    }
+    catch(err){
+        console.log(err);
+        return "error"
     }
 }

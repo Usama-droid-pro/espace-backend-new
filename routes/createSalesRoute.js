@@ -9,6 +9,7 @@ router.get("/getUserTotalSales" , controller.getUserTotalSales)
 router.get("/getUserTotalSalesByPayoutStatus" , controller.getUserTotalSalesByPayoutStatus)
 router.get("/getUserTotalSalesByMonth" , controller.getUserSalesByMonth)
 router.get("/getUserTotalSalesByYear" , controller.getUserSalesByYear)
+router.get("/getAllSales" , controller.getAllSales)
 
 
 

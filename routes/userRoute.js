@@ -19,6 +19,8 @@ router.get("/getAllDeviceTokens" , controller.getAllDeviceTokens)
 router.get("/getAllUsers_customers" , controller.getAllUsers_customers);
 router.get("/getAllUsers_trader" , controller.getAllUsers_trader);
 router.put("/update_bank_info" , controller.updateBankInfo);
+router.get("/check_referral_code_exists" , controller.checkReferral_exists);
+
 
 
 

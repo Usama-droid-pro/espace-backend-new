@@ -49,7 +49,6 @@ router.post("/register", upload.single("img"),  async (req, res) => {
       email: req.body.email,
       password: hashPassword,
       img:img,
-      paypal_email:req.body.paypal_email,
       user_name:req.body.user_name,
      
     });
@@ -58,7 +57,9 @@ router.post("/register", upload.single("img"),  async (req, res) => {
       const savedAdmin= await admin.save();
       
       res.json({
-        savedAdmin
+        message: "Admin saved successfully",
+        status:true,
+        result:savedAdmin
 
       })
     } catch (err) {

@@ -14,6 +14,10 @@ const admin_salesSchema = new mongoose.Schema({
         default:new Date(Date.now()),
     },
     transaction_id:String,   
+    product_price :String,
+    user_current_rank:String,
+    admin_profit:String,
+    user_commission:String,
 })
 
 module.exports = mongoose.model("admin_sale" , admin_salesSchema)

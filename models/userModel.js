@@ -19,7 +19,11 @@ const userSchema = new mongoose.Schema({
     },
     is_payable:Boolean,
     can_create_trade:Boolean,
-    current_rank:String,
+    current_rank:{
+        type:String,
+        enum:["BP1RG" , "BP2RD" , "BP3RR"],
+        default:"BP1RG"
+    },
     
 })
 
