@@ -1,7 +1,7 @@
 const adminModel= require("../models/adminModel");
 const bcrypt = require("bcryptjs");
 const fs = require("fs");
-const { ifError } = require("assert");
+
 exports.getAllAdmins= (req,res)=>{
     adminModel.find({},function(err, foundResult){
         try{
@@ -12,25 +12,65 @@ exports.getAllAdmins= (req,res)=>{
     })
 }
 
-exports.getSpecificAdmin= (req,res)=>{
-    const adminId = req.params.adminId;
-    adminModel.find({_id:adminId},function(err, foundResult){
-        try{
-            res.json(foundResult)
-        }catch(err){
-            res.json(err)
-        }
-    })
+exports.getSpecificAdmin= async (req,res)=>{
+    try{
+        const adminId = req.params.adminId;
+         if (!adminId){
+            return (
+                res.json({
+                    message: "Please Provide Admin Id ",
+                    status:false
+                })
+            )
+         }
+
+         const result = await adminModel.findOne({_id:adminId});
+         if(result){
+            res.json({
+                message: "Admin fetched",
+                status:true,
+                result:result
+            })
+         }
+         else{
+            res.json({
+                message: "Couldn't find Fetched",
+                status:false,
+            })
+         }
+    }
+    catch(err){
+        res.json({
+            message: "Error Occurred",
+            status:false,
+            error:err.message
+        })
+    }
+    
+    
 }
-exports.deleteAdmin= (req,res)=>{
+exports.deleteAdmin= async (req,res)=>{
     const adminId = req.params.adminId;
-    adminModel.deleteOne({_id:adminId},function(err, foundResult){
-        try{
-            res.json(foundResult)
-        }catch(err){
-            res.json(err)
-        }
-    })
+
+    if(!adminId){
+        return (
+            res.json({
+                message: "Please Provide adminId",
+                status:false,
+            })
+        )
+    }
+    const result = await adminModel.deleteOne({_id:adminId});
+    if(result.deletedCount>0){
+        res.json({
+            message: "Admin Deleted Successfully",
+            status:true,
+            result:result
+        })
+    }
+    else{
+        res.json({message: "Admin could not be deleted" , status:false})
+    }
 }
 
 exports.updatePassword=async (req,res)=>{
@@ -83,13 +123,15 @@ exports.updateProfile = async (req,res)=>{
             const user_name = req.body.user_name;
             const email = req.body.email;
             const admin_id = req.body.admin_id;
+            const paypal_email = req.body.paypal_email;
 
 
             console.log(admin_id)
             const result = await adminModel.findOneAndUpdate({_id:admin_id},
                 {
                     user_name: user_name,
-                    email: email
+                    email: email,
+                    paypal_email: paypal_email
                 },
                 {
                     new:true

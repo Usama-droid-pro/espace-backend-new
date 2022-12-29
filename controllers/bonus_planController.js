@@ -91,7 +91,32 @@ exports.createBonusPlan = async (req, res)=>{
 
 exports.getAllBonusPlans = async (req,res)=>{
     try{
-        const result = await bonusPlanModel.find({});
+        let result=[];
+        const BP1RG = await bonusPlanModel.find({rank_uniq_id:"BP1RG"});
+        const BP2RD = await bonusPlanModel.find({rank_uniq_id:"BP2RD"});
+        const BP3RR = await bonusPlanModel.find({rank_uniq_id:"BP3RR"});
+
+        if(BP1RG){
+            result.push({
+                rank_uniq_id:"BP1RG",
+                bonusOfSales_numbers:BP1RG
+            })
+        }
+        if(BP2RD){
+            result.push({
+                rank_uniq_id:"BP2RD",
+                bonusOfSales_numbers:BP2RD
+            })
+        }
+        if(BP3RR){
+            result.push({
+                rank_uniq_id:"BP3RR",
+                bonusOfSales_numbers:BP3RR
+            })
+        }
+        
+
+
 
         if(result){
             res.json({

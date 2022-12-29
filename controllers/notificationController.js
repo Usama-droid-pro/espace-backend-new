@@ -21,13 +21,13 @@ exports.createNotification = async (req,res)=>{
                 })
             )
         }else{
-            if(notification_type=="new_trade" || notification_type=="trade_update" || notification_type=="new_sale" || notification_type=="sale_target_achieved" || notification_type=="rank_update"){
+            if(notification_type=="new_trade" || notification_type=="trade_update" || notification_type=="new_sale" || notification_type=="sale_target_achieved" || notification_type=="rank_update" || notification_type=="payment_received"){
                 console.log("Ok")
             }
             else{
                 return(
                     res.json({
-                        message: "notification_type can only be one of these [new_trade, trade_update ,new_sale , sale_target_achieved , rank_update]",
+                        message: "notification_type can only be one of these [new_trade, trade_update ,new_sale , sale_target_achieved , rank_update , payment_received]",
                         status:false,
                     })
                 )
@@ -87,11 +87,11 @@ exports.createNotification = async (req,res)=>{
             }
         }
 
-        if(notification_type =="new_sale" || notification_type =="sale_target_achieved" || notification_type =="rank_update"){
+        if(notification_type =="new_sale" || notification_type =="sale_target_achieved" || notification_type =="rank_update" || notification_type =="payment_received") {
             if(from !== "system"){
                 return (
                     res.json({
-                        message: "when notification_type is(new_sale OR sale_target_achieved OR rank_update) 'from' can only be 'system'",
+                        message: "when notification_type is(new_sale OR sale_target_achieved OR rank_update OR payment_received) 'from' can only be 'system'",
                         status:false,
                     })
                 )
@@ -99,7 +99,7 @@ exports.createNotification = async (req,res)=>{
             if(!ObjectId.isValid(to)){
                 return (
                     res.json({
-                        message: "when notification_type is(new_sale OR sale_target_achieved OR rank_update) 'to' must be a type of mongoose object id", 
+                        message: "when notification_type is(new_sale OR sale_target_achieved OR rank_update OR payment_received) 'to' must be a type of mongoose object id", 
                         status:false,
                     })
                 )

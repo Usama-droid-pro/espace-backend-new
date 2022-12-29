@@ -15,7 +15,7 @@ const notificationSchema = new mongoose.Schema(
     notification_type:{
         type:String,
         enum:[
-         "new_trade" ,"trade_update" , "new_sale" , "sale_target_achieved" , "rank_update"
+         "new_trade" ,"trade_update" , "new_sale" , "sale_target_achieved" , "rank_update" , "payment_received"
         ]
     }
   },

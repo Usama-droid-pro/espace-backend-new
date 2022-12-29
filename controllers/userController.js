@@ -6,6 +6,7 @@ const userModel = require("../models/userModel")
 const referralCodes = require("referral-codes")
 const fs= require("fs");
 const { ifError } = require("assert");
+const admin_salesModel = require("../models/admin_salesModel")
 
 exports.register= async (req,res)=>{
 
@@ -159,12 +160,23 @@ exports.login = async (req,res)=>{
     });;
 
     const token = jwt.sign({ _id: user._id}, process.env.TOKEN);
+    var payment_Details={}
+
+    const foundResult = await admin_salesModel.findOne({invited_user_id:user._id});
+    console.log(foundResult)
+    if(foundResult){
+        payment_Details.user_payment_status = true
+    }
+    else{
+        payment_Details.user_payment_status = false
+    }
 
     res.json({
         message: "Logged in successfully", 
         result:user,
         token: token,
         status:"success",
+        payment_Details:payment_Details
         
     })
 
@@ -497,6 +509,43 @@ exports.getAllDeviceTokens = async (req,res)=>{
     }
 }
 
+exports.checkReferral_exists = async (req,res)=>{
+    try{
+        const referral_code= req.query.referral_code;
+        
+        if(!referral_code){
+            return (
+                res.json({
+                    message: "Please Provide referral code to check if it exists or not",
+                    status:false
+                })
+            )
+        }
+
+        const result = await userModel.findOne({refferal_code: referral_code});
+        if(result){
+            res.json({
+                message: "User with this referral code exists",
+                status:true,
+                result: result
+            })
+        }
+        else{
+            res.json({
+                message: "Could not find user with this referral code",
+                status:false,
+                statusCode:404
+            })
+        }
+    }
+    catch(err){
+        res.json({
+            message: "Error Occurred",
+            status:false,
+            error:err.message
+        })
+    }
+}
 
 const registerSchema = Joi.object({
   user_name: Joi.string(),
