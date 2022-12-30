@@ -34,7 +34,7 @@ exports.getSpecificAdmin= async (req,res)=>{
          }
          else{
             res.json({
-                message: "Couldn't find Fetched",
+                message: "Couldn't find ",
                 status:false,
             })
          }
@@ -126,6 +126,19 @@ exports.updateProfile = async (req,res)=>{
             const paypal_email = req.body.paypal_email;
 
 
+
+            const foundResult = await adminModel.findOne({email:email , _id:admin_id});
+            if(!foundResult){
+                const foundEmail = await adminModel.findOne({email:email});
+                if(foundEmail){
+                    return (
+                        res.json({
+                            message: "Another User is already exists with this email",
+                            status:false
+                        })
+                    )
+                }
+            }
             console.log(admin_id)
             const result = await adminModel.findOneAndUpdate({_id:admin_id},
                 {

@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const tradeModel = require("../models/tradeModel");
 const ObjectId = require("mongodb").ObjectId;
+const userModel = require("../models/userModel")
 
 exports.createTrade = async (req,res)=>{
     try{
@@ -32,7 +33,18 @@ exports.createTrade = async (req,res)=>{
         }
         
         if(addedBy==="trader"){
-            addedBy_id=req.body.addedBy_id
+            const foundTrader = await userModel.findOne({_id:req.body.addedBy_id , user_type:"trader" })
+            if(!foundTrader){
+                return (
+                    res.json({
+                        message: "Not any User with this Id is registered as a trader . please provide correct trader id",
+                        status:false
+                    })
+                )
+            }else{
+                addedBy_id=req.body.addedBy_id
+            }
+           
         }
 
         const newTrade =  new tradeModel({

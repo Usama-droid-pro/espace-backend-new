@@ -13,7 +13,13 @@ exports.createStopLoss =async (req,res)=>{
 
         // console.log(isValid);
 
-        
+        const isObjectId= mongoose.isValidObjectId(trade_id);
+        if (!isObjectId){
+            return (res.json({
+                message: "This Trade Id is not a valid object id",
+                status:false,
+            }))
+        }
         let regex = /[S][L]\d+$/g
         let isMatch = stop_loss_name.match(regex)
         console.log(isMatch);

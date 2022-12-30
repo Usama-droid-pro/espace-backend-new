@@ -7,6 +7,7 @@ const rankModel = require("../models/ranksModel")
 const bonus_plan=require("../models/bonusPlanModel");
 
 
+
 exports.createSale= async (req,res)=>{
     try{
         const referral_id= req.body.referral_id;
@@ -30,6 +31,7 @@ exports.createSale= async (req,res)=>{
             }
         }
 
+      
 
         console.log(day + " "+ month + " "+ year)
 
@@ -430,6 +432,7 @@ exports.createPayout = async (req,res)=>{
             {
                 payout_status:true,
                 date_of_payout:new Date(Date.now()),
+                transaction_id:transaction_id
             }, 
             {
                 new:true

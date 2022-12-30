@@ -22,7 +22,11 @@ router.put("/updateImg",upload.single('img'),controller.updateImage)
 
 router.post("/register", upload.single("img"),  async (req, res) => {
     const { error } = registerSchema.validate(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+    if (error) return res.status(400).json({
+      message:"Error occurred while validating",
+      error:error.details[0].message,
+      status:false 
+    });
     //Check if the user is already in the db
     const emailExists = await adminModel.findOne({ email: req.body.email });
   
@@ -69,8 +73,11 @@ router.post("/register", upload.single("img"),  async (req, res) => {
 
 router.post("/login",async (req, res) => {
     const { error } = loginSchema.validate(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
-    
+    if (error) return res.status(400).json({
+      message:"Error occurred while validating",
+      error:error.details[0].message,
+      status:false 
+    });
   
     const admin = await adminModel.findOne({ email: req.body.email });
    

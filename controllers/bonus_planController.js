@@ -1,6 +1,8 @@
 
 const mongoose = require('mongoose');
 const bonusPlanModel = require('../models/bonusPlanModel');
+const rankModel = require("../models/ranksModel");
+const productPriceModel= require("../models/productPriceModel")
 
 
 exports.createBonusPlan = async (req, res)=>{
@@ -92,26 +94,63 @@ exports.createBonusPlan = async (req, res)=>{
 exports.getAllBonusPlans = async (req,res)=>{
     try{
         let result=[];
-        const BP1RG = await bonusPlanModel.find({rank_uniq_id:"BP1RG"});
-        const BP2RD = await bonusPlanModel.find({rank_uniq_id:"BP2RD"});
-        const BP3RR = await bonusPlanModel.find({rank_uniq_id:"BP3RR"});
+        const BP1RG = await bonusPlanModel.find({rank_uniq_id:"BP1RG"}).sort({sales_no:1});
+        const BP2RD = await bonusPlanModel.find({rank_uniq_id:"BP2RD"}).sort({sales_no:1});
+        const BP3RR = await bonusPlanModel.find({rank_uniq_id:"BP3RR"}).sort({sales_no:1});
 
+        
+        const product_price = await getProductPrice();
+
+        if(product_price==null){
+            return (
+                res.json({
+                    message: "Could not get Product Price for commission calculation , It seems product price is not added",
+                    status:false
+                })
+            )
+        }
+        const commission_BP1RG = await getCommissionPerSale("BP1RG" , product_price);
+        const commission_BP2RD = await getCommissionPerSale("BP2RD" , product_price);
+        const commission_BP3RR = await getCommissionPerSale("BP3RR" , product_price);
+
+        if(commission_BP1RG=="error" || commission_BP2RD=="error" || commission_BP3RR=="error"){
+            return (
+                res.json({
+                    message: "Error Occurred while Calculating commission for the rank ,Make sure rank is properly added",
+                    status:false
+                })
+            )
+        }
+
+
+
+        
+
+        
         if(BP1RG){
             result.push({
                 rank_uniq_id:"BP1RG",
-                bonusOfSales_numbers:BP1RG
+                commission_per_sale:commission_BP1RG.commissionPrice,
+                commission_in_percentage:commission_BP1RG.commission_in_percentage,
+                bonusOfSales_numbers:BP1RG,
+                
             })
         }
         if(BP2RD){
             result.push({
                 rank_uniq_id:"BP2RD",
-                bonusOfSales_numbers:BP2RD
+                commission_per_sale:commission_BP2RD.commissionPrice,
+                commission_in_percentage:commission_BP2RD.commission_in_percentage,
+                bonusOfSales_numbers:BP2RD,
+                
             })
         }
         if(BP3RR){
             result.push({
                 rank_uniq_id:"BP3RR",
-                bonusOfSales_numbers:BP3RR
+                commission_per_sale:commission_BP3RR.commissionPrice,
+                commission_in_percentage:commission_BP3RR.commission_in_percentage,
+                bonusOfSales_numbers:BP3RR,
             })
         }
         
@@ -267,5 +306,65 @@ exports.updateBonusPlan = async (req,res)=>{
             error:err.message,
             status:false
         })
+    }
+}
+
+async function getCommissionPerSale(rank_id , productPrice){
+    try{
+        const result = await rankModel.findOne({unique_id:rank_id});
+        if(result){
+            console.log(result);
+            if(result.commission){
+                console.log(typeof(result.commission))
+                var commission= parseInt (result.commission);
+
+            }
+
+            let commissionPrice= (commission/100)* parseInt(productPrice);
+            
+            if(commissionPrice){
+                return(
+                    {
+                        commissionPrice:commissionPrice,
+                        commission_in_percentage: commission
+                    }
+                )
+            }
+            else{
+                return "error"
+            }
+
+            
+        }
+    }
+    catch(err){
+       
+        return "error"
+    }
+}
+
+async function getProductPrice(){
+    try{
+        //Getting PR_UNIQUE Price
+        const productPriceResult= await productPriceModel.findOne({unique_id: "PR_UNIQUE"});
+        var product_price;
+        
+        if(productPriceResult){
+            if(productPriceResult.price){
+                product_price = productPriceResult.price;
+                return product_price;
+            }
+            else{
+                return null;
+            }
+            
+        }
+        else{
+            return null;
+        }
+    }
+    catch(err){
+        console.log(err);
+        return null;
     }
 }
