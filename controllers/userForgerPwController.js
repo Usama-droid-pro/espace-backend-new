@@ -41,7 +41,8 @@ exports.emailVerification= (req,res)=>{
                 }
                 else{
                     res.json({
-                        message:"No one found with This Email address"
+                        message:"No one found with This Email address",
+                        status:false,
                      })
                 }
              })
@@ -136,6 +137,7 @@ const sendOTPVerificationEmail = async({_id,email},res)=>{
            res.json({
              message: `Sent a verification email to ${email}`,
              status:"pending",
+             success:"true",
              data:{
                 userId:_id,
                 otp:otp,

@@ -13,6 +13,14 @@ exports.createCurrency = async (req,res)=>{
         if(req.file){
             var icon = req.file.path;
         }
+        if(name==""){
+            return(
+                res.json({
+                    message: "name could not be empty",
+                    status:false
+                })
+            )
+        }
 
 
         const foundName = await currencyModel.findOne({name:  { 

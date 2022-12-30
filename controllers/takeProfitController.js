@@ -12,6 +12,14 @@ exports.createTakeProfit =async (req,res)=>{
         // const  isValid = await checkName(take_profit_name);
 
         // console.log(isValid);
+
+        const isObjectId= mongoose.isValidObjectId(trade_id);
+        if (!isObjectId){
+            return (res.json({
+                message: "This Trade Id is not a valid object id",
+                status:false,
+            }))
+        }
         let regex = /[T][P]\d+$/g
         let isMatch = take_profit_name.match(regex)
         console.log(isMatch);
