@@ -58,6 +58,8 @@ exports.createTrade = async (req,res)=>{
             current_price:current_price,
             pips:pips,
             rir:rir,
+            takeProfit:[],
+            stopLoss:[],
 
         })
         const result = await newTrade.save();
@@ -589,6 +591,188 @@ exports.deleteTradesOfSpecificTrader = async(req,res)=>{
     catch(err){
         res.json({
             message: "Error",
+            status:false,
+            error:err.message
+        })
+    }
+}
+
+exports.updateTakeProfit = async (req,res)=>{
+    try{
+        const takeProfit = req.body.takeProfit;
+        const trade_id = req.body.trade_id;
+
+
+        if(!trade_id){
+            return(
+                res.json({
+                    message: "trade_id is required",
+                    status:false,
+                })
+            )
+            
+        }
+        console.log(Array.isArray(takeProfit))
+
+        if(Array.isArray(takeProfit)==false){
+            return(
+                res.json({
+                    message: "take profit must be an array",
+                    status:false,
+                })
+            )
+            
+        }
+        
+        let regex = /[T][P]\d+$/g
+        
+        
+        if(takeProfit){
+            for(let i=0 ; i<takeProfit.length ; i++){
+                if(takeProfit[i].take_profit_name){
+                    let isMatch = takeProfit[i].take_profit_name.match(regex)
+                    if(!isMatch){
+                        return(
+                            res.json({
+                                message: "take profit name must be in the format  Name must be like : TP1 ,TP2 , It seems One of element of array not following the format",
+                                status:false,
+                            })
+                        )
+                    }
+
+
+                }
+                else{
+                    res.json({
+                        message: "It seems some array Object ,may not have take_profit_name , please provide take profit_name in every takeProfit object ",
+                        status:false
+                    })
+                }
+            }
+        }
+
+        const result = await tradeModel.findOneAndUpdate({_id:trade_id} 
+            ,
+            {
+                takeProfit: takeProfit
+            },
+            {
+                new:true
+            }
+            );
+
+            
+        if(result){
+            res.json({
+                message: "Take Profit has been successfully updated",
+                result: result,
+                status:true
+            })
+        }
+        else{
+            res.json({
+                message: "could not update take profit",
+                status:false,
+            })
+        }      
+
+        
+    }
+    catch(err){
+        res.json({
+            message: "Error Occurred",
+            status:false,
+            error:err.message
+        })
+    }
+}
+
+
+exports.updateStopLoss = async (req,res)=>{
+    try{
+        const stopLoss = req.body.stopLoss;
+        const trade_id = req.body.trade_id;
+
+
+        if(!trade_id){
+            return(
+                res.json({
+                    message: "trade_id is required",
+                    status:false,
+                })
+            )
+            
+        }
+        console.log(Array.isArray(stopLoss))
+
+        if(Array.isArray(stopLoss)==false){
+            return(
+                res.json({
+                    message: "stop loss must be an array",
+                    status:false,
+                })
+            )
+            
+        }
+        
+        let regex = /[S][L]\d+$/g
+
+        
+        
+        if(stopLoss){
+            for(let i=0 ; i<stopLoss.length ; i++){
+                if(stopLoss[i].stop_loss_name){
+                    let isMatch = stopLoss[i].stop_loss_name.match(regex)
+                    if(!isMatch){
+                        return(
+                            res.json({
+                                message: "stop loss name must be in the format  Name must be like : SL1 ,SL2 , It seems One of element of array not following the format",
+                                status:false,
+                            })
+                        )
+                    }
+
+
+                }
+                else{
+                    res.json({
+                        message: "It seems some array Object ,may not have stop_loss_name, please provide stop_loss_name in every stopLoss object ",
+                        status:false
+                    })
+                }
+            }
+        }
+
+        const result = await tradeModel.findOneAndUpdate({_id:trade_id} 
+            ,
+            {
+                stopLoss: stopLoss
+            },
+            {
+                new:true
+            }
+            );
+
+            
+        if(result){
+            res.json({
+                message: "stopLoss has been successfully updated",
+                result: result,
+                status:true
+            })
+        }
+        else{
+            res.json({
+                message: "could not update stopLoss",
+                status:false,
+            })
+        }      
+
+        
+    }
+    catch(err){
+        res.json({
+            message: "Error Occurred",
             status:false,
             error:err.message
         })

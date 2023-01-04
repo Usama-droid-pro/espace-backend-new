@@ -17,6 +17,10 @@ router.put("/updateTakeProfit" , controller.updateTakeProfit)
 router.put("/updateStopLoss" , controller.updateStopLoss)
 router.put("/active_close_trade" , controller.active_close_trade)
 router.delete("/deleteTradesOfSpecificTrader" , controller.deleteTradesOfSpecificTrader)
+router.put("/updateTakeProfit" , controller.updateTakeProfit)
+router.put("/updateStopLoss" , controller.updateStopLoss)
+
+
 
 
 module.exports= router;
