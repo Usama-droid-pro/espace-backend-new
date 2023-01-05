@@ -109,6 +109,7 @@ exports.getAllBonusPlans = async (req,res)=>{
                 })
             )
         }
+
         const commission_BP1RG = await getCommissionPerSale("BP1RG" , product_price);
         const commission_BP2RD = await getCommissionPerSale("BP2RD" , product_price);
         const commission_BP3RR = await getCommissionPerSale("BP3RR" , product_price);
@@ -183,20 +184,35 @@ exports.getAllBonusPlans = async (req,res)=>{
 exports.getBonusPriceOfAllSales_nos_By_rank_unique_id= async (req,res)=>{
     try{
         const rank_uniq_id = req.query.rank_uniq_id;
+
+        let result_final=[];
+
         if(rank_uniq_id){
             if(rank_uniq_id=="BP1RG" || rank_uniq_id=="BP2RD" || rank_uniq_id=="BP3RR"){
 
+
+
+            const product_price = await getProductPrice();
+            const commission = await getCommissionPerSale(rank_uniq_id , product_price);
             const result = await bonusPlanModel.find({rank_uniq_id:rank_uniq_id});
-            if(result){
+
+            result_final.push({
+                rank_uniq_id:rank_uniq_id,
+                commission_per_sale:commission.commissionPrice,
+                commission_in_percentage:commission.commission_in_percentage,
+                bonusOfSales_numbers:result
+            })
+            
+            if(result_final){
             res.json({
-                message: "All Bonus Plans Fetched successfully",
-                result: result,
+                message: "Bonus Plan of this rank Fetched successfully",
+                result: result_final,
                 status:true
             })
         }
         else{
             res.json({
-                message: "Could not fetch Bonus Plans",
+                message: "Could not fetch Bonus Plan",
                 status:false
             })
         }
