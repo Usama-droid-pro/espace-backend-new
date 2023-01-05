@@ -735,6 +735,11 @@ async function checkPreviousThreeMonthRank (referral_id){
                 }else if(rankInLastThreeMonth=="BP2RD"){
                     threshold =20
                 }
+
+                console.log(threshold)
+                console.log(result[0].total_sales)
+                console.log(result[1].total_sales)
+
                 if(result[0].total_sales >= threshold){
                     if(result[1].total_sales>=threshold){
                         return ({

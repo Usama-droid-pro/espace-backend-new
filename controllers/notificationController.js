@@ -285,7 +285,6 @@ exports.NotificationsBySystem = async (req,res)=>{
 exports.getNotificationsOfSpecificUser = async (req,res)=>{
     try{
         let user_id = req.query.user_id;
-       
 
         if(!user_id){
             return(
@@ -296,6 +295,7 @@ exports.getNotificationsOfSpecificUser = async (req,res)=>{
             )
         }
 
+
         const result = await notificationModel.aggregate([
             {
                 $match:{
@@ -304,7 +304,7 @@ exports.getNotificationsOfSpecificUser = async (req,res)=>{
             },
             {
                 $addFields: {
-                    to: { $toObjectId: "$" }
+                    to: { $toObjectId: "$to" }
                  }
             }
             ,
