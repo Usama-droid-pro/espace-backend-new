@@ -1,4 +1,5 @@
 
+const { date } = require("joi");
 const mongoose = require("mongoose");
 
 const admin_salesSchema = new mongoose.Schema({
@@ -10,8 +11,7 @@ const admin_salesSchema = new mongoose.Schema({
     month:String,
     referral_exist:Boolean,
     date_created:{
-        type:Date,
-        default:new Date(Date.now()),
+        type:Date
     },
     transaction_id:String,   
     product_price :String,

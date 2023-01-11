@@ -43,7 +43,6 @@ const tradeModel = new mongoose.Schema({
     stopLoss:Array,
     date_of_trade:{
         type:Date,
-        default:new Date(Date.now())
     }
     
 })
