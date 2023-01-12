@@ -5,6 +5,7 @@ const userModel = require("../models/userModel")
 
 exports.createTrade = async (req,res)=>{
     try{
+        const date = req.body.date;
         let addedBy = req.body.addedBy;
         let trade_type = req.body.trade_type;
         let currency1_id= req.body.currency1_id;
@@ -60,6 +61,7 @@ exports.createTrade = async (req,res)=>{
             rir:rir,
             takeProfit:[],
             stopLoss:[],
+            date_of_trade:date
 
         })
         const result = await newTrade.save();

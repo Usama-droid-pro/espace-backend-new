@@ -12,8 +12,22 @@ exports.createSale= async (req,res)=>{
     try{
         const referral_id= req.body.referral_id;
         var referral_exists;
-        let date = new Date();
-        var day = date.getDay().toLocaleString();
+        let date = req.body.date;
+        var date_created= date;
+        date=  new Date(date);
+        console.log(date);
+        console.log(date_created);
+            
+        if(!date){
+            return (
+                res.json({message: "Date must be provided" , status:false,})
+                
+            )
+        }
+
+        
+        var day = date.getDate().toLocaleString();
+        console.log(day)
         var month = date.getMonth().toLocaleString();
         month=parseInt(month);
         month = (month+1);
@@ -31,11 +45,9 @@ exports.createSale= async (req,res)=>{
             }
         }
 
+
+        console.log('after' + date_created )
       
-
-        console.log(day + " "+ month + " "+ year)
-
-
 
         let responses = {
 
@@ -83,7 +95,7 @@ exports.createSale= async (req,res)=>{
             var user_commission = getCommission_adminProfit.commissionPrice;
 
 
-            const isAdminSalesSaved =await createAdminSales(day, transaction_id, invited_user_id,month , referral_exists , year , referral_id, current_rank_of_user , productPrice , adminProfit , user_commission)
+            const isAdminSalesSaved =await createAdminSales(day, transaction_id, invited_user_id,month , referral_exists , year , referral_id, current_rank_of_user , productPrice , adminProfit , user_commission , date_created)
             if(isAdminSalesSaved){
                 console.log("Admin sales saved successfully")
                 responses.adminSaleMessage="Admin Sales were saved successfully"
@@ -145,7 +157,7 @@ exports.createSale= async (req,res)=>{
                             //checking if user rank is updated or not
                             responses.message1="Rank of User Incremented"
                         
-                            const isCreateUserSales= await createUser_sales(referral_id, year, month, newRank);
+                            const isCreateUserSales= await createUser_sales(referral_id, year, month, newRank , date_created);
                             if(isCreateUserSales){
                                 res.json({
                                     message: "User Sales created",
@@ -162,7 +174,7 @@ exports.createSale= async (req,res)=>{
                     else if (result.eligible==false){
                     console.log(current_rank_of_user)
                     if(current_rank_of_user){
-                        const isCreateUserSales= await createUser_sales(referral_id, year, month,current_rank_of_user);
+                        const isCreateUserSales= await createUser_sales(referral_id, year, month,current_rank_of_user , date_created);
                         if(isCreateUserSales){
                             console.log("user sales created")
                             res.json({
@@ -198,7 +210,8 @@ exports.createSale= async (req,res)=>{
                     })
                 )
             }
-            const isAdminSalesSaved =await createAdminSales(day, transaction_id, 0 ,month , referral_exists , year , 0 , 0 , productPrice , productPrice ,0) // if no referaral than obviously adminprofilt will be eq to product price
+            console.log(date_created)
+            const isAdminSalesSaved =await createAdminSales(day, transaction_id, 0 ,month , referral_exists , year , 0 , 0 , productPrice , productPrice ,0 , date_created) // if no referaral than obviously adminprofilt will be eq to product price
             if(isAdminSalesSaved==true){
                 res.json({
                     message: "Admin Sales Created",
@@ -504,8 +517,10 @@ exports.getAllSales = async (req,res)=>{
 
 
 
-async function createAdminSales(day, transaction_id, invited_user_id,month , referral_exists , year , referral_id , user_current_rank , productPrice , adminProfit , user_commission){
+async function createAdminSales(day, transaction_id, invited_user_id,month , referral_exists , year , referral_id , user_current_rank , productPrice , adminProfit , user_commission , date){
     try{
+        
+        console.log(date);
         console.log(productPrice ,adminProfit ,)
         var newAdminSales = new admin_salesModel({
             _id:mongoose.Types.ObjectId(),
@@ -519,7 +534,8 @@ async function createAdminSales(day, transaction_id, invited_user_id,month , ref
             user_current_rank:user_current_rank,
             product_price:productPrice,
             admin_profit :adminProfit,
-            user_commission:user_commission
+            user_commission:user_commission,
+            date_created:date
 
         })
 
@@ -538,7 +554,7 @@ async function createAdminSales(day, transaction_id, invited_user_id,month , ref
     }
 }
 
-async function createUser_sales(referral_id, year, month,rank_id ){
+async function createUser_sales(referral_id, year, month,rank_id ,date ){
     try{
 
          let productPrice= getProductPrice();
@@ -567,6 +583,7 @@ async function createUser_sales(referral_id, year, month,rank_id ){
             commissions:commissionPrice,
             bonus:0,
             payout_amount:commissionPrice,
+            date_created:date
          });
 
          const result= await new_user_sales.save();

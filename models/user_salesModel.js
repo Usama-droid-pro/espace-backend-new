@@ -14,8 +14,7 @@ const user_salesSchema = new mongoose.Schema({
     payout_amount:String,
     date_of_payout:String,
     date_created:{
-        type:Date,
-        default:new Date(Date.now())
+        type:Date
     }
 })
 
